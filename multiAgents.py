@@ -29,7 +29,6 @@ class ReflexAgent(Agent):
       headers.
     """
 
-
     def getAction(self, gameState):
         """
         You do not need to change this method, but you're welcome to.
@@ -68,14 +67,25 @@ class ReflexAgent(Agent):
         to create a masterful evaluation function.
         """
         # Useful information you can extract from a GameState (pacman.py)
+        # Successor game grid
         successorGameState = currentGameState.generatePacmanSuccessor(action)
+        # Successor coordinate
         newPos = successorGameState.getPacmanPosition()
+        # Successor food grid
         newFood = successorGameState.getFood()
+        # Successor remaining food list
+        newFoodList = newFood.asList()
+        # IDK
         newGhostStates = successorGameState.getGhostStates()
+        # List with the number of moves that each ghost will remain scared
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        #return successorGameState.getScore()
+        
+        
+        return 100
+        
 
 def scoreEvaluationFunction(currentGameState):
     """
