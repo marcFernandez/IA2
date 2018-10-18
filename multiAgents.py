@@ -82,9 +82,19 @@ class ReflexAgent(Agent):
 
         "*** YOUR CODE HERE ***"
         #return successorGameState.getScore()
+        dist = 99999
         
+        if(len(newFood.asList())!=len(currentGameState.getFood().asList())):
+            dist = 0
+        else:
+            for food in newFood.asList():
+                if dist > util.manhattanDistance(food,newPos):
+                    dist = util.manhattanDistance(food,newPos)
         
-        return 100
+        for ghost in successorGameState.getGhostPositions():
+            dist += 4**(2-util.manhattanDistance(ghost,newPos))
+        
+        return -dist
         
 
 def scoreEvaluationFunction(currentGameState):
