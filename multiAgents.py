@@ -251,7 +251,113 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # Defineixo PACMAN amb el seu index
+        PACMAN = 0;
+        
+        # Defineixo les alpha i beta inicials.
+        ALPHA = float("-inf")
+        BETA = float("inf")
+        
+        # Aquesta es la funcio que cridare quan toqui fer el max, es a dir, quan
+        # li toqui al pacman.
+        #       
+        # Retorna una accio, si estem a depth=0 (primera crida).
+        # Retorna el valor maxim dels successors altrament.
+        def maxAgent(state,depth,alpha,beta):
+            
+            # Si l'estat a evaluar es un estat final, retorno la puntuacio d'aquest.
+            if state.isWin() or state.isLose():
+                
+                return state.getScore()
+            
+            # Guardo la llista de possibles accions a realitzar pel pacman.
+            actions = state.getLegalActions(PACMAN)
+            # Defineixo la puntuacio maxima com a -infinit.
+            maxScore = float("-inf")
+            # De moment, assumim que la millor accio es quedarse quiet.
+            bestAction = Directions.STOP
+            # Recorrem totes les possibles accions.
+            for action in actions:
+                
+                # Ara hem de comprovar el valor de cada estat successor i actualitzarem
+                # quan sigui major que el valor maxim actual, actualitzant tambe l'accio
+                # per poderla retornar despres.
+                if minAgent(state.generateSuccessor(PACMAN,action), depth, 1,alpha,beta) > maxScore:
+                    
+                    maxScore = minAgent(state.generateSuccessor(PACMAN,action), depth, 1,alpha,beta)
+                    bestAction = action
+                
+                # Si la puntuacio actual es major al factor beta que tenim, podem deixar d'explorar
+                # estats successors.
+                if maxScore > beta: break
+            
+                # Actualitzem el valor d'alpha.
+                alpha = max(maxScore,alpha)
+                    
+            # Explicat a sobre del def maxAgent().      
+            if depth == 0: return bestAction
+            else: return maxScore
+        
+        # Aquesta es la funcio que cridare quan toqui fer el min, es a dir, quan
+        # li toqui a cadascun dels fantasmes.
+        #       
+        # Retorna el valor minim dels successors.
+        def minAgent(state,depth,ghost,alpha,beta):
+            
+            # Si l'estat a evaluar es un estat final, retorno la puntuacio d'aquest.
+            if state.isWin() or state.isLose():
+                
+                return state.getScore()
+            # Defineixo l'index del que sera el proper fantasma i...
+            nextGhost = ghost + 1
+            # ...si aquest es el mateix que el numero d'agents que tenim, voldra dir
+            # que el seguent agent sera el pacman.
+            if nextGhost == state.getNumAgents():
+                nextGhost = PACMAN
+            
+            # Defineixo la llista de possibles accions a realitzar pel fantasma(actual).
+            actions = state.getLegalActions(ghost)
+            # Defineixo la puntuacio minima com a infinit.
+            minScore = float("inf")
+            # Defineixo una variable score que em servira per emmagatzemar valors per a
+            # compararlos amb la puntuacio minima.
+            score = minScore
+            
+            # Recorrem totes les possibles accions.
+            for action in actions:
+                
+                # Si el seguent agent es pacman...
+                if nextGhost == PACMAN:
+                    # ...i estem a la profunditat escollida (en aquest cas sera self.depth-1
+                    # ja que comencem a comptar per 0) o la profunditat escollida es 0, la 
+                    # puntuacio sera la que s'evalua si el fantasma fa l'accio actual.
+                    if depth == self.depth-1 or self.depth == 0:
+                        score = self.evaluationFunction(state.generateSuccessor(ghost,action))
+                    # Altrament, la puntuacio sera la que ens retorni el maxAgent() amb una
+                    # profunditat mes.
+                    else:
+                        score = maxAgent(state.generateSuccessor(ghost,action),depth+1,alpha,beta)
+                # Si no, la puntuacio sera la que ens retorni el seguent minAgent().
+                else:
+                    score = minAgent(state.generateSuccessor(ghost,action),depth,nextGhost,alpha,beta)
+                # Actualitzem la puntuacio minima si aquesta es major que la puntuacio
+                # actual.
+                if score < minScore:
+                    minScore = score
+                    
+                # Si la puntuacio actual es major al factor alpha que tenim, podem deixar d'explorar
+                # estats successors.
+                if minScore < alpha: break
+            
+                # Actualitzem el valor de beta.
+                beta = min(minScore,beta)
+            return minScore
+        # Retornem la crida a maxAgent(estat,0,alpha,beta).
+        # El 0 representa que estem a profunditat 0, es a dir, que es la primera iteracio de
+        # la recursivitat (si es que n'hi ha).
+        # alpha es -infinit inicialment.
+        # beta es infinit inicialment.
+        return maxAgent(gameState,0,ALPHA,BETA)
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
