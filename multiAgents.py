@@ -375,63 +375,60 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         # Defineixo PACMAN amb el seu index
         PACMAN = 0;
         
-        def expValue(state,ghost,depth):
-            if state.isWin() or state.isLose():
-                return self.evaluationFunction(state)
-            actions = state.getLegalActions(ghost)
-            nextGhost = ghost+1
-            if nextGhost==state.getNumAgents():
-                nextGhost=PACMAN
-            value = 0
-            
-            for action in actions:
-                if(nextGhost==PACMAN):
-                    if depth==self.depth-1 or self.depth==0:
-                        value += self.evaluationFunction(state)
-                    else:
-                        value += maxAgent(state.generateSuccessor(ghost,action),depth+1)
-                else:
-                    value += expValue(state.generateSuccessor(ghost,action),nextGhost,depth)
-            return float(value)/float(len(actions))
-        # Aquesta es la funcio que cridare quan toqui fer el max, es a dir, quan
-        # li toqui al pacman.
-        #       
-        # Retorna una accio, si estem a depth=0 (primera crida).
-        # Retorna el valor maxim dels successors altrament.
         def maxAgent(state,depth):
             
-            # Si l'estat a evaluar es un estat final, retorno la puntuacio d'aquest.
             if state.isWin() or state.isLose():
-                
                 return state.getScore()
             
-            # Guardo la llista de possibles accions a realitzar pel pacman.
             actions = state.getLegalActions(PACMAN)
-            # Defineixo la puntuacio maxima com a -infinit.
-            maxScore = float("-inf")
-            score = float("-inf")
-            # De moment, assumim que la millor accio es quedarse quiet.
-            bestAction = Directions.STOP
-            # Recorrem totes les possibles accions.
+            
+            maxValue = float("-inf")
+            
+            bestAction = None
+            
             for action in actions:
                 
-                for ghost in range(1,state.getNumAgents()):
+                value = expAgent(state.generateSuccessor(PACMAN,action),1,depth)
                 
-                    score = expValue(state.generateSuccessor(PACMAN,action),ghost,depth)
-                # Ara hem de comprovar el valor de cada estat successor i actualitzarem
-                # quan sigui major que el valor maxim actual, actualitzant tambe l'accio
-                # per poderla retornar despres.
-                # if minAgent(state.generateSuccessor(PACMAN,action), depth, 1) > maxScore:
-                    if score > maxScore:
-                        
-                        maxScore = score
-                        bestAction = action
+                if value > maxValue:
                     
-            # Explicat a sobre del def maxAgent().      
-            if depth == 0: return bestAction
-            else: return maxScore
+                    maxValue = value
+                    bestAction = action
+            
+            if depth==0:
+                return bestAction
+            else:
+                return maxValue
+        
+        def expAgent(state,ghost,depth):
+            
+            if state.isWin() or state.isLose():
+                return state.getScore()
+            
+            actions = state.getLegalActions(ghost)
+            
+            value = 0
+            prob = 1./float(len(actions))
+            
+            for action in actions:
+                
+                if ghost + 1 == state.getNumAgents(): # => PACMAN is the next to move
+                    
+                    if depth == self.depth-1:# or depth == 0:
+                        value += self.evaluationFunction(state.generateSuccessor(ghost,action))*prob
+                    
+                    else:
+                        value += maxAgent(state.generateSuccessor(ghost,action),depth+1)*prob
+                
+                else:
+                    
+                    value += expAgent(state.generateSuccessor(ghost,action),ghost+1,depth)*prob
+            
+            return value
+        
         return maxAgent(gameState,0)
-
+            
+            
 def betterEvaluationFunction(currentGameState):
     """
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
@@ -440,7 +437,14 @@ def betterEvaluationFunction(currentGameState):
       DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    VALOR_MENJAR = 10
+    VALOR_FANTASMA_NORMAL = 10
+    VALOR_FANTASMA_ESPANTAT = 100
+    
+    extremely_accurate_value = 0
+    
+    return extremely_accurate_value
+
 
 # Abbreviation
 better = betterEvaluationFunction
