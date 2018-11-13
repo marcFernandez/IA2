@@ -92,7 +92,7 @@ class ReflexAgent(Agent):
                     dist = util.manhattanDistance(food,newPos)
         
         for ghost in successorGameState.getGhostPositions():
-            dist += 4**(2-util.manhattanDistance(ghost,newPos))
+            dist += 3**(2-util.manhattanDistance(ghost,newPos))
         
         return -dist
         
@@ -345,7 +345,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 if score < minScore:
                     minScore = score
                     
-                # Si la puntuacio actual es major al factor alpha que tenim, podem deixar d'explorar
+                # Si la puntuacio actual es menor al factor alpha que tenim, podem deixar d'explorar
                 # estats successors.
                 if minScore < alpha: break
             
@@ -415,15 +415,17 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             # Recorrem totes les possibles accions.
             for action in actions:
                 
-                score = expValue(state.generateSuccessor(PACMAN,action),1,depth)
+                for ghost in range(1,state.getNumAgents()):
+                
+                    score = expValue(state.generateSuccessor(PACMAN,action),ghost,depth)
                 # Ara hem de comprovar el valor de cada estat successor i actualitzarem
                 # quan sigui major que el valor maxim actual, actualitzant tambe l'accio
                 # per poderla retornar despres.
                 # if minAgent(state.generateSuccessor(PACMAN,action), depth, 1) > maxScore:
-                if score > maxScore:
-                    
-                    maxScore = score
-                    bestAction = action
+                    if score > maxScore:
+                        
+                        maxScore = score
+                        bestAction = action
                     
             # Explicat a sobre del def maxAgent().      
             if depth == 0: return bestAction
